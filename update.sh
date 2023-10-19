@@ -2,12 +2,13 @@
 set -euo pipefail
 set -x
 
-sdk='/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX13.3.sdk'
+sdk='/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.0.sdk'
 frameworks="$sdk/System/Library/Frameworks"
 includes="$sdk/usr/include"
 libs="$sdk/usr/lib"
 
-rm -rf System/Library/Frameworks/
+rm -rf ./System
+rm -rf ./usr
 
 mkdir -p ./System/Library/Frameworks
 
@@ -91,3 +92,23 @@ rm ./System/Library/Frameworks/OpenGL.framework/Versions/A/Libraries/3425AMD/lib
 
 # 444K
 rm ./System/Library/Frameworks/CloudKit.framework/Versions/A/CloudKit.tbd
+
+# Remove broken symlinks
+find . -type l ! -exec test -e {} \; -print | xargs rm
+
+# Replace symlinks with their actual file contents
+dir=System/Library/Frameworks
+tar -hcf tmp.tar $dir && rm -rf $dir && mkdir tmp && tar -xf tmp.tar
+rm -rf tmp tmp.tar
+
+dir=usr/include
+tar -hcf tmp.tar $dir && rm -rf $dir && mkdir tmp && tar -xf tmp.tar
+rm -rf tmp tmp.tar
+
+dir=usr/lib
+tar -hcf tmp.tar $dir && rm -rf $dir && mkdir tmp && tar -xf tmp.tar
+rm -rf tmp tmp.tar
+
+# Now that /Versions/Current symlinks are realized, we no longer need the duplicate
+find System/Library/Frameworks | grep '/Versions/A/' | xargs rm -rf
+find System/Library/Frameworks | grep '/Versions/C/' | xargs rm -rf
