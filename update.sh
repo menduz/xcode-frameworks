@@ -3,6 +3,7 @@ set -euo pipefail
 set -x
 
 sdk='/Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX14.0.sdk'
+coreservices="$sdk/System/Library/CoreServices"
 frameworks="$sdk/System/Library/Frameworks"
 includes="$sdk/usr/include"
 libs="$sdk/usr/lib"
@@ -11,6 +12,7 @@ rm -rf ./System
 rm -rf ./usr
 
 mkdir -p ./System/Library/Frameworks
+mkdir -p ./System/Library/CoreServices
 
 # General includes
 mkdir -p ./usr/include/libDER/
@@ -23,6 +25,9 @@ cp -R $includes/cups ./usr/include/
 mkdir -p ./usr/lib/
 cp $libs/libobjc.tbd ./usr/lib/
 cp $libs/libobjc.A.tbd ./usr/lib/
+
+# Files used by zig to detect the macos version
+cp $coreservices/SystemVersion.plist ./System/Library/CoreServices
 
 # General frameworks
 cp -R $frameworks/CoreFoundation.framework ./System/Library/Frameworks/CoreFoundation.framework
